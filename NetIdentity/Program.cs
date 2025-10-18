@@ -48,6 +48,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOUsuario", policy =>
         policy.RequireRole("Admin", "Usuario"));
 
+    options.AddPolicy("SoloMasculino", policy =>
+        policy.RequireClaim("Genero", "M"));
+
 });
 
 
@@ -74,7 +77,7 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

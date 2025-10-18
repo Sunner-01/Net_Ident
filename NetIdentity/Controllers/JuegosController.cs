@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NetIdentity.Controllers
 {
-    
+  
     public class JuegosController : Controller
     {
-        [Authorize(Policy = "menoresEdad")]
+        [Authorize(Policy = "SoloMasculino")]
+        // [Authorize(Policy = "menoresEdad")]
         public IActionResult Index()
         {
             return View();

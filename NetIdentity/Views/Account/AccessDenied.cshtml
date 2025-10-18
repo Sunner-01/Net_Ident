@@ -1,5 +1,8 @@
-﻿@{
-    ViewData["Title"] = "Acceso Denegado";
+﻿@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@{
+    ViewData["Title"] = ViewData != null ? ViewData["Title"]?.ToString() ?? "Acceso Denegado" : "Acceso Denegado";
+    var originalUrl = Context.Request.Query["ReturnUrl"].ToString();
 }
 
 <div class="row justify-content-center mt-5">
@@ -11,7 +14,44 @@
                 <p class="lead">No tienes permisos para acceder a esta sección.</p>
                 <hr>
                 <p class="mb-4">
-                    Esta área está restringida solo para usuarios <strong>menores de 18 años</strong>.
+                    Razón:
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        var reasons = new List<string>();
+                    if (!(await AuthorizationService.AuthorizeAsync(User, null, "SoloMasculino")).Succeeded)
+                    {
+                        reasons.Add("Esta sección está restringida a usuarios con género masculino.");
+                    }
+                    if (originalUrl.Contains("/Juegos/JuegoEducativo") && !(await AuthorizationService.AuthorizeAsync(User, null, "AdminOUsuario")).Succeeded)
+                    {
+                        reasons.Add("Esta sección está restringida a usuarios con rol Admin o Usuario.");
+                    }
+                    if (originalUrl.Contains("/Juegos/Aventuras") && !(await AuthorizationService.AuthorizeAsync(User, null, "SoloAdmin")).Succeeded)
+                    {
+                        reasons.Add("Esta sección está restringida a administradores.");
+                    }
+                    if (originalUrl.Contains("/Actividades/Deportes") && !(await AuthorizationService.AuthorizeAsync(User, null, "menoresEdad")).Succeeded)
+                    {
+                        reasons.Add("Esta sección está restringida a menores de 18 años.");
+                    }
+                    if (reasons.Any())
+                    {
+                        <ul>
+                            @foreach (var reason in reasons)
+                            {
+                                <li>@reason</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>Restricción de acceso desconocida.</span>
+                    }
+                }
+                else
+                {
+                    <span>Debes iniciar sesión para acceder a esta sección.</span>
+                }
                 </p>
                 <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Volver al Inicio</a>
             </div>
